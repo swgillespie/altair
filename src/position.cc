@@ -20,15 +20,12 @@
 
 #include <algorithm>
 #include <cctype>
-#include <exception>
 #include <optional>
 #include <sstream>
 #include <string>
 #include <string_view>
-#include <vector>
 
 #include "attacks.h"
-#include "movegen.h"
 
 namespace altair {
 

@@ -16,8 +16,6 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-
 #include "uci.h"
 
 int main(int argc, char* argv[]) { altair::uci::run(argc, argv); }

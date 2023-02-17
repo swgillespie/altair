@@ -20,7 +20,6 @@
 
 #include <array>
 #include <cstdint>
-#include <vector>
 
 #include "bitboard.h"
 #include "types.h"
