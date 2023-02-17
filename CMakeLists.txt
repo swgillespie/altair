@@ -35,7 +35,7 @@ add_compile_options(
 )
 
 add_link_options(
-  $<$<CONFIG:Debug>:-fsanitize=address>
+  $<$<AND:$<CONFIG:Debug>,${is_clang}>:-fsanitize=address>
 )
 
 add_subdirectory(${googletest_SOURCE_DIR}/googletest ${googletest_BINARY_DIR})

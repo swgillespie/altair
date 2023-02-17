@@ -20,6 +20,7 @@
 
 #include <cstdint>
 
+#include "compiler.h"
 #include "types.h"
 
 namespace altair {
@@ -65,7 +66,7 @@ class Bitboard {
   /**
    * Returns the number of squares set in this bitboard.
    */
-  constexpr int size() const { return __builtin_popcountll(bits_); }
+  int size() const { return popcount64(bits_); }
 
   /**
    * Efficiently pops a square from this bitboard.
@@ -75,7 +76,7 @@ class Bitboard {
       return kNoSquare;
     }
 
-    uint8_t next = __builtin_ctzll(bits_);
+    uint8_t next = count_trailing_zeroes(bits_);
     bits_ &= bits_ - 1;
     return static_cast<Square>(next);
   }
@@ -127,7 +128,7 @@ class Bitboard {
    * Assumes that this bitboard contains a single square and extracts the single
    * square from it.
    */
-  constexpr Square expect_one() && {
+  Square expect_one() && {
     CHECK(size() == 1) << "expected_one called on a bitboard of size "
                        << size();
 

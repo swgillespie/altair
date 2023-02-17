@@ -23,7 +23,6 @@
 #include <utility>
 
 #include "log.h"
-#include "util.h"
 
 namespace altair {
 
