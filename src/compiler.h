@@ -58,3 +58,10 @@
 #else
 #error "unreachable not implemented for this compiler"
 #endif
+
+#if defined(_MSC_VER)
+#define MSVC_WARNING_DISABLE(number) __pragma(warning(disable : number))
+#else
+#define MSVC_WARNING_DISABLE(number)
+#endif /* _MSC_VER */
+

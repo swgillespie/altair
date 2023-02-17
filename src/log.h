@@ -23,6 +23,8 @@
 #include <mutex>
 #include <sstream>
 
+#include "compiler.h"
+
 namespace altair {
 
 class LogMessage {
@@ -52,6 +54,7 @@ class CheckMessage : public LogMessage {
   CheckMessage(const char* cond, const char* file, int line)
       : cond_(cond), file_(file), line_(line) {}
 
+  MSVC_WARNING_DISABLE(4722)
   virtual ~CheckMessage() override {
     std::cerr << "[" << file_ << ":" << line_ << "] check \"" << cond_
               << "\" failed: " << stream_.str() << std::endl;
