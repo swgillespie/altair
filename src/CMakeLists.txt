@@ -3,10 +3,12 @@ target_compile_features(gen_magics PUBLIC cxx_std_20)
 
 add_library(altair_lib uci.cc position.cc movegen.cc attacks.cc bitboard.cc magics.cc thread.cc search.cc)
 target_compile_features(altair_lib PUBLIC cxx_std_20)
+set_property(TARGET altair_lib PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 add_executable(altair main.cc)
 target_compile_features(altair PUBLIC cxx_std_20)
 target_link_libraries(altair altair_lib)
+set_property(TARGET altair PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 add_executable(altair_test bitboard_test.cc position_test.cc movegen_test.cc)
 target_include_directories(altair_test SYSTEM PRIVATE ${googletest_SOURCE_DIR}/googletest/include PRIVATE ${googletest_SOURCE_DIR}/googletest)

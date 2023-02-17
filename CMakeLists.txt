@@ -12,6 +12,7 @@ include(FetchContent)
 include(GoogleTest)
 set(GOOGLETEST_VERSION "1.13.0")
 
+check_ipo_supported()
 FetchContent_Declare(
   googletest
   GIT_REPOSITORY https://github.com/google/googletest.git
