@@ -31,6 +31,7 @@ uint64_t perft(Position& pos, unsigned depth, bool root) {
   }
 
   std::vector<Move> moves;
+  moves.reserve(224);
   movegen::generate_pseudolegal(pos, moves);
   uint64_t running_total = 0;
   for (auto move : moves) {
