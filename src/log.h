@@ -49,11 +49,11 @@ class UciMessage : public LogMessage {
 
 class CheckMessage : public LogMessage {
  public:
-  CheckMessage(const char* cond, const char* file, const char* func, int line)
-      : cond_(cond), file_(file), func_(func), line_(line) {}
+  CheckMessage(const char* cond, const char* file, int line)
+      : cond_(cond), file_(file), line_(line) {}
 
   virtual ~CheckMessage() override {
-    std::cerr << "[" << func_ << ":" << line_ << "] check \"" << cond_
+    std::cerr << "[" << file_ << ":" << line_ << "] check \"" << cond_
               << "\" failed: " << stream_.str() << std::endl;
     std::cerr.flush();
     std::abort();
@@ -62,7 +62,6 @@ class CheckMessage : public LogMessage {
  private:
   const char* cond_;
   const char* file_;
-  const char* func_;
   int line_;
 };
 
@@ -82,10 +81,8 @@ class VoidMessage {
 #endif /* NDEBUG */
 
 #define UCI() (::altair::UciMessage().stream())
-#define CHECK(expr)                                                           \
-  (!CHECK_ENABLED() || (expr))                                                \
-      ? (void)0                                                               \
-      : ::altair::VoidMessage() & ::altair::CheckMessage(#expr,               \
-                                                         __PRETTY_FUNCTION__, \
-                                                         __FILE__, __LINE__)  \
-                                      .stream()
+#define CHECK(expr)               \
+  (!CHECK_ENABLED() || (expr))    \
+      ? (void)0                   \
+      : ::altair::VoidMessage() & \
+            ::altair::CheckMessage(#expr, __FILE__, __LINE__).stream()

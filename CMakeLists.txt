@@ -23,10 +23,15 @@ if(NOT googletest_POPULATED)
   FetchContent_Populate(googletest)
 endif(NOT googletest_POPULATED)
 
+set(is_clang "$<CXX_COMPILER_ID:Clang>")
+set(is_clang_like "$<CXX_COMPILER_ID:Clang,GNU>")
+set(is_release "$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>")
+
 add_compile_options(
-  $<$<CONFIG:Debug>:-fsanitize=address>
-  $<$<CONFIG:RelWithDebInfo>:-fno-omit-frame-pointer>
-  -fdiagnostics-color=always
+  $<$<AND:$<CONFIG:Debug>,${is_clang}>:-fsanitize=address>
+  $<$<AND:$<CONFIG:RelWithDebInfo>,${is_clang_like}>:-fno-omit-frame-pointer>
+  $<${is_clang}:-fdiagnostics-color=always>
+  $<${is_clang_like}:-Wall>
 )
 
 add_link_options(
