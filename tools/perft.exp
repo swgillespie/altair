@@ -1,0 +1,66 @@
+#!/usr/bin/expect -f
+
+if { 0 } {
+  This file is a part of Altair, a chess engine.
+  Copyright (C) 2017-2023 Sean Gillespie <sean@swgillespie.me>.
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+}
+
+if { 0 } {
+  This terrible TCL file spawns Altair and uses it to verify PERFT numbers.
+
+  https://www.chessprogramming.org/Perft_Results
+}
+
+set failed 0
+proc perft { fen depth count } {
+  global failed
+
+  set timeout 10
+  send_user "test $fen (depth $depth) => $count: "
+  log_user 0
+  spawn ./build/src/altair
+  send "position $fen\ngo perft $depth\n"
+  expect {
+    "Nodes searched: $count" {
+      log_user 1
+      send_user "ok\n"
+      log_user 0
+    }
+    timeout {
+      log_user 1
+      send_user "failed\n"
+      set failed 1
+      log_user 0
+    }
+  }
+  send "quit\n"
+  expect eof
+  log_user 1
+  return $failed
+}
+
+perft startpos 1 20
+perft startpos 2 400
+perft startpos 3 8902
+perft startpos 4 197281
+
+# "kiwipete" position: https://www.chessprogramming.org/Perft_Results#Position_2
+perft "fen r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1" 1 48
+perft "fen r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1" 2 2039
+perft "fen r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1" 3 97862
+perft "fen r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1" 4 4085603
+perft "fen r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1" 5 193690690
+exit $failed
