@@ -50,9 +50,34 @@ class BitboardPrinter:
     def display_hint(self) -> None:
         return None
 
+class ValuePrinter:
+    """
+    Printer for altair::Value.
+    """
+    VALUE_MATED = -32768 // 2 + 1
+    VALUE_MATE = 32767 // 2
+    MATE_DISTANCE_MAX = 50
+
+    val: gdb.Value
+
+    def __init__(self, val: gdb.Value) -> None:
+        self.val = val
+
+    def to_string(self) -> str:
+        val = self.val["centipawns_"]
+        if val > self.VALUE_MATE:
+            return f"#{self.VALUE_MATE + self.MATE_DISTANCE_MAX - val}"
+        elif val < self.VALUE_MATED:
+            return f"#-{val - self.VALUE_MATED + self.MATE_DISTANCE_MAX}"
+        return f"{val}"
+
+    def display_hint(self) -> str:
+        return 'string'
+
 def load_altair_pretty_printers() -> PrettyPrinter:
     pp = RegexpCollectionPrettyPrinter("altair")
     pp.add_printer('Bitboard', '^altair::Bitboard$', BitboardPrinter)
+    pp.add_printer('Value', '^altair::Value$', ValuePrinter)
     return pp
 
 register_pretty_printer(gdb.current_objfile(), load_altair_pretty_printers())

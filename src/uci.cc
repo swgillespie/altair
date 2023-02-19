@@ -22,6 +22,7 @@
 #include <iostream>
 #include <string>
 
+#include "eval.h"
 #include "log.h"
 #include "search.h"
 #include "thread.h"
@@ -64,6 +65,11 @@ void go(const std::string& buf) {
   Threads::go(pos, limits);
 }
 
+void eval() {
+  Value result = eval::evaluate(pos);
+  UCI() << result.as_uci();
+}
+
 void run_one(const std::string& buf);
 
 void bench() {
@@ -99,6 +105,8 @@ void run_one(const std::string& buf) {
     std::exit(0);
   } else if (command == "bench") {
     bench();
+  } else if (command == "eval") {
+    eval();
   }
 }
 

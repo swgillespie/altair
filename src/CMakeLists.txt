@@ -2,7 +2,7 @@
 add_executable(gen_magics gen_magics.cc)
 target_compile_features(gen_magics PUBLIC cxx_std_20)
 
-add_library(altair_lib uci.cc position.cc movegen.cc attacks.cc bitboard.cc magics.cc thread.cc search.cc)
+add_library(altair_lib uci.cc position.cc movegen.cc attacks.cc bitboard.cc magics.cc thread.cc search.cc eval.cc value.cc)
 target_compile_features(altair_lib PUBLIC cxx_std_20)
 set_property(TARGET altair_lib PROPERTY INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
 set_property(TARGET altair_lib PROPERTY INTERPROCEDURAL_OPTIMIZATION_RELWITHDEBINFO TRUE)
