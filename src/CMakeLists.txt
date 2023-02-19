@@ -12,6 +12,7 @@ add_library(altair_lib
   search.cc search.h
   eval.cc eval.h
   value.cc value.h
+  ttable.cc ttable.h
 )
 target_compile_features(altair_lib PUBLIC cxx_std_20)
 set_property(TARGET altair_lib PROPERTY INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)

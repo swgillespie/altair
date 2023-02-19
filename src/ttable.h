@@ -18,25 +18,22 @@
 
 #pragma once
 
-#include <cstdint>
-#include <string>
+/**
+ * Interface to Altair's transposition table.
+ *
+ * https://www.chessprogramming.org/Transposition_Table
+ */
 
-#include "log.h"
+#include "move.h"
+#include "position.h"
+#include "value.h"
 
-namespace altair {
+namespace altair::ttable {
 
-class Value {
- public:
-  explicit Value(int16_t centipawns);
-  Value() : Value(0) {}
+void initialize();
+void query(const Position& pos);
+void record_pv(const Position& pos, Move best, unsigned depth, Value value);
+void record_cut(const Position& pos, Move best, unsigned depth, Value value);
+void record_all(const Position& pos, unsigned depth, Value value);
 
-  static Value mated_in(unsigned ply);
-  static Value mate_in(unsigned ply);
-
-  std::string as_uci() const;
-
- private:
-  int16_t centipawns_;
-};
-
-}  // namespace altair
+}  // namespace altair::ttable

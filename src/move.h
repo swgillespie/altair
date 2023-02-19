@@ -29,6 +29,8 @@ class Move {
  public:
   friend struct std::hash<Move>;
 
+  Move() : bits_(0) {}
+
   static Move quiet(Square src, Square dst) { return Move(src, dst); }
 
   static Move capture(Square src, Square dst) {
