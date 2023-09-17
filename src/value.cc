@@ -62,4 +62,27 @@ std::string Value::as_uci() const {
   return ss.str();
 }
 
+Value Value::operator+(const Value& other) const {
+  CHECK(centipawns_ > kValueMated && centipawns_ < kValueMate)
+      << "Value out of range";
+  int16_t next = centipawns_ + other.centipawns_;
+  if (next <= kValueMated) {
+    next = kValueMated + 1;
+  } else if (next >= kValueMate) {
+    next = kValueMate - 1;
+  }
+
+  return Value(next);
+}
+
+Value Value::operator+(int16_t value) const { return *this + Value(value); }
+Value Value::operator-(const Value& value) const { return *this + -value; }
+Value Value::operator-(int16_t value) const { return *this + -value; }
+
+Value& Value::operator+=(const Value& other) { return *this = *this + other; }
+Value& Value::operator+=(int16_t other) { return *this = *this + other; }
+Value& Value::operator-=(const Value& other) { return *this = *this - other; }
+Value& Value::operator-=(int16_t other) { return *this = *this - other; }
+Value Value::operator-() const { return Value(-centipawns_); }
+
 }  // namespace altair

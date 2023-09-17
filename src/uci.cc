@@ -107,6 +107,8 @@ void run_one(const std::string& buf) {
     bench();
   } else if (command == "eval") {
     eval();
+  } else if (command == "dumppos") {
+    pos.dump();
   }
 }
 

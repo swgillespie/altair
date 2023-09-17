@@ -35,6 +35,16 @@ class Value {
 
   std::string as_uci() const;
 
+  Value operator+(const Value& other) const;
+  Value operator+(int16_t value) const;
+  Value& operator+=(const Value& other);
+  Value& operator+=(int16_t other);
+  Value operator-(const Value& other) const;
+  Value operator-(int16_t value) const;
+  Value& operator-=(const Value& other);
+  Value& operator-=(int16_t other);
+  Value operator-() const;
+
  private:
   int16_t centipawns_;
 };

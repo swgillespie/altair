@@ -284,6 +284,15 @@ constexpr Square square_of(File file, Rank rank) {
                              static_cast<int>(file));
 }
 
+/**
+ * "Fips" a square across the middle ranks of the board.
+ */
+constexpr Square flip(Square sq) {
+  File f = file_of(sq);
+  Rank r = static_cast<Rank>(7 - static_cast<uint8_t>(rank_of(sq)));
+  return square_of(f, r);
+}
+
 inline std::string square_string(Square sq) {
   std::string s;
   s.reserve(2);

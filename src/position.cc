@@ -454,4 +454,30 @@ bool Position::is_check(Color side) const {
   return !squares_attacking(king, !side).empty();
 }
 
+void Position::dump() const {
+  std::cerr << std::endl;
+  for (int rank = kRank8; rank >= kRank1; rank--) {
+    for (int file = kFileA; file < kFileLast; file++) {
+      Square sq = square_of(static_cast<File>(file), static_cast<Rank>(rank));
+      Piece piece = piece_at(sq);
+      if (piece != kNoPiece) {
+        std::cerr << " " << piece_char(piece) << " ";
+      } else {
+        std::cerr << " . ";
+      }
+    }
+
+    std::cerr << "| " << rank_char(static_cast<Rank>(rank)) << std::endl;
+  }
+
+  for (int i = kFileA; i < kFileLast; i++) {
+    std::cerr << "---";
+  }
+  std::cerr << std::endl;
+  for (int i = kFileA; i < kFileLast; i++) {
+    std::cerr << " " << static_cast<char>(i + 97) << " ";
+  }
+  std::cerr << std::endl;
+}
+
 }  // namespace altair

@@ -123,6 +123,11 @@ class Position {
    */
   std::string fen() const;
 
+  /**
+   * Prints a human-readable board image for this position to stderr.
+   */
+  void dump() const;
+
  private:
   /**
    * Board representation.
