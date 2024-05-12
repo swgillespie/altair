@@ -1,6 +1,6 @@
 /*
  *  This file is a part of Altair, a chess engine.
- *  Copyright (C) 2017-2023 Sean Gillespie <sean@swgillespie.me>.
+ *  Copyright (C) 2017-2024 Sean Gillespie <sean@swgillespie.me>.
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,24 +18,16 @@
 
 #pragma once
 
-/**
- * Interface to Altair's transposition table.
- *
- * https://www.chessprogramming.org/Transposition_Table
- */
-
 #include <cstdint>
 
-#include "move.h"
-#include "position.h"
-#include "value.h"
+#include "types.h"
 
-namespace altair::ttable {
+namespace altair::zobrist {
 
-void initialize(uint64_t hashSize);
-void query(const Position& pos);
-void record_pv(const Position& pos, Move best, unsigned depth, Value value);
-void record_cut(const Position& pos, Move best, unsigned depth, Value value);
-void record_all(const Position& pos, unsigned depth, Value value);
+void modify_piece(uint64_t *hash, Square square, Piece piece);
+void modify_side_to_move(uint64_t *hash);
+void modify_kingside_castle(uint64_t *hash, Color color);
+void modify_queenside_castle(uint64_t *hash, Color color);
+void modify_en_passant(uint64_t *hash, Square oldSquare, Square newSquare);
 
-}  // namespace altair::ttable
+}

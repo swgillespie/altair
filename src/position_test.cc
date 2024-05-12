@@ -118,3 +118,19 @@ TEST(Position, king_move_prevents_castling) {
   ASSERT_FALSE(pos.can_castle_kingside(altair::kWhite));
   ASSERT_FALSE(pos.can_castle_queenside(altair::kWhite));
 }
+
+TEST(Position, piece_square_move_modifies_hash) {
+  Position pos;
+  pos.set("8/p3kp2/1n6/8/3K4/8/P4P2/8 w - - 4 59");
+  size_t hash = std::hash<Position>{}(pos);
+  pos.make_move(Move::quiet(altair::D4, altair::D5));
+  size_t new_hash = std::hash<Position>{}(pos);
+  ASSERT_NE(hash, new_hash);
+}
+
+TEST(Position, fen_set_has_nonzero_hash) {
+  Position pos;
+  pos.set("8/p3kp2/1n6/8/3K4/8/P4P2/8 w - - 4 59");
+  size_t hash = std::hash<Position>{}(pos);
+  ASSERT_NE(hash, 0);
+}

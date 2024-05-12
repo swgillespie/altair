@@ -19,12 +19,14 @@
 #pragma once
 
 #include <array>
+#include <cstdint>
 #include <string_view>
 #include <vector>
 
 #include "bitboard.h"
 #include "move.h"
 #include "types.h"
+#include "zobrist.h"
 
 namespace altair {
 
@@ -123,6 +125,11 @@ class Position {
    */
   std::string fen() const;
 
+  /**
+   * Returns a Zobrist hash of this position.
+   */
+  uint64_t hash() const;
+
  private:
   /**
    * Board representation.
@@ -133,21 +140,39 @@ class Position {
   Color side_to_move_;
   std::vector<IrreversibleState> states_;
   int ply_;
+  uint64_t hash_;
 };
 
 inline void Position::set_en_passant_square(Square square) {
+  Square old_square = en_passant_square();
   states_.back().ep_square = square;
+  zobrist::modify_en_passant(&hash_, old_square, square);
 }
 
 inline Square Position::en_passant_square() const {
   return states_.back().ep_square;
 }
 
-inline void Position::set_side_to_move(Color side) { side_to_move_ = side; }
+inline void Position::set_side_to_move(Color side) {
+  side_to_move_ = side;
+  zobrist::modify_side_to_move(&hash_);
+}
 
 inline Color Position::side_to_move() const { return side_to_move_; }
 
 inline void Position::set_castling_rights(CastlingRights rights) {
+  Color us = side_to_move();
+  CastlingRights kingside_castle =
+      us == kWhite ? kCastleWhiteKingside : kCastleBlackKingside;
+  CastlingRights queenside_castle =
+      us == kWhite ? kCastleWhiteQueenside : kCastleBlackQueenside;
+  CastlingRights old_castling_rights = castling_rights();
+  if ((old_castling_rights & kingside_castle) != (rights & kingside_castle)) {
+    zobrist::modify_kingside_castle(&hash_, us);
+  }
+  if ((old_castling_rights & queenside_castle) != (rights & queenside_castle)) {
+    zobrist::modify_queenside_castle(&hash_, us);
+  }
   states_.back().castling = rights;
 }
 
@@ -166,6 +191,8 @@ inline int Position::halfmove_clock() const {
 inline void Position::set_ply(int ply) { ply_ = ply; }
 
 inline int Position::ply() const { return ply_; }
+
+inline uint64_t Position::hash() const { return hash_; }
 
 inline Bitboard Position::pieces(Color side) const {
   return boards_by_color_[side];
@@ -189,3 +216,11 @@ inline bool Position::can_castle_queenside(Color side) const {
 }
 
 }  // namespace altair
+
+namespace std {
+template <>
+struct hash<altair::Position> {
+  size_t operator()(const altair::Position& pos) const { return pos.hash(); }
+};
+
+}  // namespace std

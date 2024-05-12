@@ -26,6 +26,7 @@
 #include <string_view>
 
 #include "attacks.h"
+#include "zobrist.h"
 
 namespace altair {
 
@@ -222,6 +223,7 @@ void Position::add_piece(Piece piece, Square square) {
   pieces_by_square_[square] = piece;
   boards_by_piece_[piece - 1].set(square);
   boards_by_color_[color_of(piece)].set(square);
+  zobrist::modify_piece(&hash_, square, piece);
 }
 
 Piece Position::remove_piece(Square square) {
@@ -230,6 +232,7 @@ Piece Position::remove_piece(Square square) {
   pieces_by_square_[square] = kNoPiece;
   boards_by_piece_[p - 1].unset(square);
   boards_by_color_[color_of(p)].unset(square);
+  zobrist::modify_piece(&hash_, square, p);
   return p;
 }
 
@@ -363,6 +366,8 @@ void Position::make_move(Move mov) {
     // King moves invalidate all castling rights.
     CastlingRights mask = us == kWhite ? kCastleWhite : kCastleBlack;
     new_state.castling &= ~mask;
+    zobrist::modify_kingside_castle(&hash_, us);
+    zobrist::modify_queenside_castle(&hash_, us);
   } else if (kind_of(p) == kRook) {
     // Rook moves invalidate castling rights on the side of the board that the
     // rook originated.
@@ -372,14 +377,17 @@ void Position::make_move(Move mov) {
       CastlingRights mask =
           us == kWhite ? kCastleWhiteKingside : kCastleBlackKingside;
       new_state.castling &= ~mask;
+      zobrist::modify_kingside_castle(&hash_, us);
     } else if (can_castle_queenside(us) && mov.source() == queenside_rook) {
       CastlingRights mask =
           us == kWhite ? kCastleWhiteQueenside : kCastleBlackQueenside;
       new_state.castling &= ~mask;
+      zobrist::modify_queenside_castle(&hash_, us);
     }
   }
 
   side_to_move_ = !side_to_move_;
+  zobrist::modify_side_to_move(&hash_);
   if (mov.is_double_pawn_push()) {
     Direction down = us == kWhite ? kDirectionSouth : kDirectionNorth;
     new_state.ep_square = towards(mov.destination(), down);
