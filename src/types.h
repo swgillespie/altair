@@ -284,6 +284,15 @@ constexpr Square square_of(File file, Rank rank) {
                              static_cast<int>(file));
 }
 
+/**
+ * Returns the square corresponding to this square when mirrored horizontally
+ * across the center of the board.
+ */
+constexpr Square horizontal_flip(Square sq) {
+  return square_of(file_of(sq), static_cast<Rank>(static_cast<uint8_t>(kRank8) -
+                                                  rank_of(sq)));
+}
+
 inline std::string square_string(Square sq) {
   std::string s;
   s.reserve(2);

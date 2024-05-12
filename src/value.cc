@@ -31,11 +31,6 @@ const int16_t kMateDistanceMax = 50;
 
 }  // namespace
 
-Value::Value(int16_t centipawns) : centipawns_(centipawns) {
-  CHECK(centipawns_ > kValueMated) << "centipawn value too low";
-  CHECK(centipawns_ < kValueMate) << "centipawn value too high";
-}
-
 Value Value::mate_in(unsigned ply) {
   CHECK(ply < kMateDistanceMax) << "ply too deep for mate";
   return Value(kValueMate + kMateDistanceMax - ply);
@@ -44,6 +39,29 @@ Value Value::mate_in(unsigned ply) {
 Value Value::mated_in(unsigned ply) {
   CHECK(ply < kMateDistanceMax) << "ply too deep for mated";
   return Value(kValueMated - kMateDistanceMax + ply);
+}
+
+Value Value::operator+(const Value& other) const {
+  CHECK(centipawns_ > kValueMated && centipawns_ < kValueMate);
+  int16_t next = centipawns_ + other.centipawns_;
+  if (next <= kValueMated || next >= kValueMate) [[unlikely]] {
+    if (next <= kValueMated) {
+      next = kValueMated + 1;
+    } else {
+      next = kValueMate - 1;
+    }
+  }
+
+  return Value(next);
+}
+
+Value Value::operator-(const Value& other) const { return *this + -other; }
+
+Value Value::operator-() const { return Value(-centipawns_); }
+
+Value& Value::operator+=(const Value& other) {
+  *this = *this + other;
+  return *this;
 }
 
 std::string Value::as_uci() const {

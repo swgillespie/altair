@@ -27,11 +27,18 @@ namespace altair {
 
 class Value {
  public:
-  explicit Value(int16_t centipawns);
-  Value() : Value(0) {}
+  constexpr Value(int16_t centipawns) : centipawns_(centipawns) {}
+
+  constexpr Value() : Value(0) {}
 
   static Value mated_in(unsigned ply);
   static Value mate_in(unsigned ply);
+
+  Value operator+(const Value& other) const;
+  Value operator-(const Value& other) const;
+  Value operator-() const;
+  Value& operator+=(const Value& other);
+  Value& operator-=(const Value& other);
 
   std::string as_uci() const;
 
