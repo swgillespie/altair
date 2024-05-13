@@ -64,6 +64,10 @@ Value& Value::operator+=(const Value& other) {
   return *this;
 }
 
+bool Value::operator==(const Value& other) const {
+  return centipawns_ == other.centipawns_;
+}
+
 std::string Value::as_uci() const {
   std::ostringstream ss;
 

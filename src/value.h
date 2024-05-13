@@ -39,6 +39,7 @@ class Value {
   Value operator-() const;
   Value& operator+=(const Value& other);
   Value& operator-=(const Value& other);
+  bool operator==(const Value& other) const;
 
   std::string as_uci() const;
 

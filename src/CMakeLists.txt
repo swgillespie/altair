@@ -25,7 +25,12 @@ target_link_libraries(altair altair_lib)
 set_property(TARGET altair PROPERTY INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
 set_property(TARGET altair PROPERTY INTERPROCEDURAL_OPTIMIZATION_RELWITHDEBINFO TRUE)
 
-add_executable(altair_test bitboard_test.cc position_test.cc movegen_test.cc)
+add_executable(altair_test
+  bitboard_test.cc
+  position_test.cc
+  movegen_test.cc
+  ttable_test.cc
+)
 target_include_directories(altair_test SYSTEM PRIVATE ${googletest_SOURCE_DIR}/googletest/include PRIVATE ${googletest_SOURCE_DIR}/googletest)
 target_compile_features(altair_test PUBLIC cxx_std_20)
 target_link_libraries(altair_test altair_lib gtest gtest_main)

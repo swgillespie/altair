@@ -19,93 +19,74 @@
 #include "ttable.h"
 
 #include <atomic>
-#include <cstdint>
+#include <cstdlib>
 #include <cstring>
 #include <memory>
-#include <mutex>
-#include <shared_mutex>
+#include <new>
+#include <thread>
 
 namespace altair::ttable {
 
-namespace {
-
-enum class NodeKind { PV, All, Cut };
-
-struct TableEntry {
-  std::mutex lock;
-  uint64_t zobrist_key;
-  Move best;
-  unsigned depth;
-  NodeKind kind;
-  Value value;
-};
-
-std::shared_mutex kResizeLock;
-
-std::atomic<TableEntry*> kTable = nullptr;
-std::atomic_uint64_t kTableLength = 0;
-
-}  // namespace
+std::atomic<RawTableEntry*> kTable;
+std::atomic<size_t> kTableSize;
 
 void initialize(uint64_t hashSize) {
-  std::unique_lock<std::shared_mutex> lock(kResizeLock);
-
-  uint64_t buckets = hashSize / sizeof(TableEntry);
-  kTableLength.store(buckets, std::memory_order_relaxed);
-  TableEntry* old =
-      kTable.exchange(new TableEntry[kTableLength], std::memory_order_relaxed);
-  if (old) {
-    delete[] old;
-  }
+  size_t entry_count = (hashSize * 1024 * 1024) / sizeof(RawTableEntry);
+  RawTableEntry* table = new RawTableEntry[entry_count];
+  kTable.store(table, std::memory_order_relaxed);
+  kTableSize.store(entry_count, std::memory_order_relaxed);
 }
 
-void query(const Position& pos) {
-  std::shared_lock<std::shared_mutex> table_lock(kResizeLock);
+void destroy() {
+  delete[] kTable.load(std::memory_order_relaxed);
+  kTable.store(nullptr, std::memory_order_relaxed);
+  kTableSize.store(0, std::memory_order_relaxed);
 }
 
 void record_pv(const Position& pos, Move best, unsigned depth, Value value) {
-  std::shared_lock<std::shared_mutex> table_lock(kResizeLock);
-
-  uint64_t key = 0; /* TODO pos.zobrist_hash() */
-  TableEntry& entry = kTable.load(
-      std::memory_order_relaxed)[key %
-                                 kTableLength.load(std::memory_order_relaxed)];
-
-  std::scoped_lock<std::mutex> entry_lock(entry.lock);
-  entry.best = best;
-  entry.depth = depth;
-  entry.kind = NodeKind::PV;
-  entry.value = value;
+  uint64_t key = pos.hash();
+  RawTableEntry& entry =
+      kTable.load(std::memory_order_relaxed)[key % kTableSize];
+  entry.with_lock([&](TableEntry& entry) {
+    std::memset(&entry, 0, sizeof(TableEntry));
+    entry.zobrist_key = key;
+    entry.move = best;
+    entry.value = value;
+    entry.depth = depth;
+    entry.kind = NodeKind::PV;
+    return 0;
+  });
 }
 
 void record_cut(const Position& pos, Move best, unsigned depth, Value value) {
-  std::shared_lock<std::shared_mutex> table_lock(kResizeLock);
-
-  uint64_t key = 0; /* TODO pos.zobrist_hash() */
-  TableEntry& entry = kTable.load(
-      std::memory_order_relaxed)[key %
-                                 kTableLength.load(std::memory_order_relaxed)];
-
-  std::scoped_lock<std::mutex> entry_lock(entry.lock);
-  entry.best = best;
-  entry.depth = depth;
-  entry.kind = NodeKind::Cut;
-  entry.value = value;
+  uint64_t key = pos.hash();
+  RawTableEntry& entry =
+      kTable.load(std::memory_order_relaxed)[key % kTableSize];
+  entry.with_lock([&](TableEntry& entry) {
+    entry.zobrist_key = key;
+    entry.move = best;
+    entry.value = value;
+    entry.depth = depth;
+    entry.kind = NodeKind::Cut;
+    return 0;
+  });
 }
 
 void record_all(const Position& pos, unsigned depth, Value value) {
-  std::shared_lock<std::shared_mutex> table_lock(kResizeLock);
+  uint64_t key = pos.hash();
+  RawTableEntry& entry =
+      kTable.load(std::memory_order_relaxed)[key % kTableSize];
+  entry.with_lock([&](TableEntry& entry) {
+    if (entry.kind == NodeKind::All && entry.depth >= depth) {
+      return 0;
+    }
 
-  uint64_t key = 0; /* TODO pos.zobrist_hash() */
-  TableEntry& entry = kTable.load(
-      std::memory_order_relaxed)[key %
-                                 kTableLength.load(std::memory_order_relaxed)];
-
-  std::scoped_lock<std::mutex> entry_lock(entry.lock);
-  entry.best = Move::null();
-  entry.depth = depth;
-  entry.kind = NodeKind::All;
-  entry.value = value;
+    entry.zobrist_key = key;
+    entry.move = Move::null();
+    entry.depth = depth;
+    entry.kind = NodeKind::All;
+    return 0;
+  });
 }
 
 }  // namespace altair::ttable
